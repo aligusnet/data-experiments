@@ -54,7 +54,7 @@ class MnistData:
             print('reading {} labels from {}'.format(nitems, filename))
             buffer = f.read(nitems)
             data = np.frombuffer(buffer, dtype=np.uint8)
-            return data.reshape(nitems, 1)
+            return data
 
     def _read_data_set(self, features_filename, labels_filename):
         X = self._extract_features(features_filename)
