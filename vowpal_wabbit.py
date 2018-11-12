@@ -1,5 +1,6 @@
 import os
 import subprocess
+import numpy as np
 from uuid import uuid1
 from sklearn.base import BaseEstimator
 
@@ -58,10 +59,10 @@ class VowpalWabbitClassifier(BaseEstimator):
         if proc.returncode != 0:
             raise ExecutionError('transform failed', proc)
 
-        with open(self._predictions) as pred_file:
-            self.predict_proba_ = [float(label) for label in pred_file.readlines()]
+        self.predict_proba_ = np.fromfile(self._predictions, dtype = float, sep = os.linesep)
 
-        self.predictions_ = list(map(lambda x: -1.0 if x < 0.0 else 1.0, self.predict_proba_))
+        to_predictions = np.vectorize(lambda x: -1.0 if x < 0.0 else 1.0)
+        self.predictions_ = to_predictions(self.predict_proba_)
 
         if self._debug:
             print(self.transform_output_)
