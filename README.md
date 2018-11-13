@@ -14,3 +14,9 @@ pip install -U pandas scipy matplotlib scikit-learn
 pip install -U spacy
 python -m spacy download en
 ```
+
+### Beautiful Soup 4
+
+```(shell)
+pip install -U beautifulsoup4
+```
