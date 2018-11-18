@@ -29,6 +29,8 @@ nlp = spacy.load('en_core_web_lg', disable=["tagger", "parser", "ner"])
 
 * **Vowpal Wabbit**: Squared and hinge loss function do not work as well as logistic. [VW Loss functions](https://github.com/VowpalWabbit/vowpal_wabbit/wiki/Loss-functions).
 
+* **Vowpal Wabbit**: Cleaning text data does not show good results for logistic/squared/hinge loss functions (/Quora_Insincere_Questions/Vowpal_Wabbit/logistic_spacy_vectors_clean_data.ipynb). Unexpected.
+
 ### Spam Assassin Corpus
 
 * **spacy** - cleaning text data (removing stop words and punctuation) allowed to achieve the best results (/Spam_Assassin_Corpus/sklearn/spacy_vectors_clean_data_random_forest.ipynb).
