@@ -25,4 +25,6 @@ nlp = spacy.load('en_core_web_lg', disable=["tagger", "parser", "ner"])
 
 * **Vowpal Wabbit**: Using spacy word vectors to train logistic model did not show as good results as ordinary Word Count or TF-IDF.
 
-* **Vowpal Wabbit**: I do not understand how regularization works on VW. Small values for L1 and L2 around 1e-9 do not show any significant results, bigger values aroung 1e-6 demontrate significant overfitting on all experiments. Quite unexpected result.
+* **Vowpal Wabbit**: I do not understand how regularization works on VW. Small values for L1 and L2 around 1e-9 do not show any significant results, bigger values around 1e-6 demonstrated significant metrics degradation.
+
+* **Vowpal Wabbit**: Squared and hinge loss function do not work as well as logistic.
