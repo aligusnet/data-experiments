@@ -17,9 +17,12 @@ nlp = spacy.load('en_core_web_lg', disable=["tagger", "parser", "ner"])
 
 * I believe it is better to use vectors only statistical model if only similarity analysis required (`en_vectors_web_lg` vs. `en_core_web_lg`). However, I've got slightly worse results using vectors only model.
 
-
 ## 18/11/2018
 
 ### Quora Insincere Questions
 
-* It took 33 hours to run a random search on the full set of training data of quora questions with no good results. It definitely makes sense to start searching on smaller subsets of data: Quora_Insincere_Questions/sklearn/token_counts.ipynb
+* **sklearn**: It took 33 hours to run a random search on the full set of training data of quora questions with no good results. It definitely makes sense to start searching on smaller subsets of data: Quora_Insincere_Questions/sklearn/token_counts.ipynb
+
+* **Vowpal Wabbit**: Using spacy word vectors to train logistic model did not show as good results as ordinary Word Count or TF-IDF.
+
+* **Vowpal Wabbit**: I do not understand how regularization works on VW. Small values for L1 and L2 around 1e-9 do not show any significant results, bigger values aroung 1e-6 demontrate significant overfitting on all experiments. Quite unexpected result.
