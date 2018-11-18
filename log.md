@@ -28,3 +28,7 @@ nlp = spacy.load('en_core_web_lg', disable=["tagger", "parser", "ner"])
 * **Vowpal Wabbit**: I do not understand how regularization works on VW. Small values for L1 and L2 around 1e-9 do not show any significant results, bigger values around 1e-6 demonstrated significant metrics degradation.
 
 * **Vowpal Wabbit**: Squared and hinge loss function do not work as well as logistic. [VW Loss functions](https://github.com/VowpalWabbit/vowpal_wabbit/wiki/Loss-functions).
+
+### Spam Assassin Corpus
+
+* **spacy** - cleaning text data (removing stop words and punctuation) allowed to achieve the best results (/Spam_Assassin_Corpus/sklearn/spacy_vectors_clean_data_random_forest.ipynb).
