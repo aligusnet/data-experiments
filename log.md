@@ -45,9 +45,9 @@ nlp = spacy.load('en_core_web_lg', disable=["tagger", "parser", "ner"])
 Best results on test data:
 
 | | |
-| --- | --- 
-| accuracy | 0.9214 
-| precision | 0.3952991452991453 
+| --- | ---
+| accuracy | 0.9214
+| precision | 0.3952991452991453
 | recall | 0.6271186440677966
 | f1 | 0.4849279161205766
 | AUC | 0.8917624596984817
@@ -55,9 +55,21 @@ Best results on test data:
 Best result got using Grid Search:
 
 | | |
-| --- | --- 
+| --- | ---
 | accuracy | 0.9468
 | precision | 0.6239316239316239
 | recall | 0.24745762711864408
 | f1 | 0.354368932038835
 | AUC | 0.8905030710207316
+
+* **TF-IDF - logistic regression** - train on 20 000 samples.
+
+Best result got using Grid Search:
+
+| | |
+| --- | ---
+| accuracy | 0.9472
+| precision | 0.6396396396396397
+| recall | 0.24067796610169492
+| f1 | 0.3497536945812808
+| AUC | 0.9033188638123886
