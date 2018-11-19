@@ -73,3 +73,13 @@ Best result got using Grid Search:
 | recall | 0.6406779661016949
 | f1 | 0.490272373540856
 | AUC | 0.903716565500099
+
+* **cleaned tokens counts - logistic regression**
+
+| | |
+| --- | ---
+| accuracy | 0.92
+| precision | 0.389937106918239
+| recall | 0.6305084745762712
+| f1 | 0.4818652849740932
+| AUC | 0.8956688701165367
