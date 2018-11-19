@@ -93,3 +93,13 @@ Best result got using Grid Search:
 | recall | 0.5694915254237288
 | f1 | 0.4786324786324786
 | AUC | 0.9163407121886201
+
+* **spacy vectors - cleaned text - logistic regression**
+
+| | |
+| --- | ---
+| accuracy | 0.8296
+| precision | 0.22722820763956905
+| recall | 0.7864406779661017
+| f1 | 0.3525835866261398
+| AUC | 0.8908107134494497
