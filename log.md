@@ -56,11 +56,11 @@ Best result got using Grid Search:
 
 | | |
 | --- | ---
-| accuracy | 0.9468
-| precision | 0.6239316239316239
-| recall | 0.24745762711864408
-| f1 | 0.354368932038835
-| AUC | 0.8905030710207316
+| accuracy | 0.9226
+| precision | 0.4012875536480687
+| recall | 0.6338983050847458
+| f1 | 0.49145860709592637
+| AUC | 0.8916551090617626
 
 * **TF-IDF - logistic regression** - train on 20 000 samples.
 
@@ -68,8 +68,8 @@ Best result got using Grid Search:
 
 | | |
 | --- | ---
-| accuracy | 0.9472
-| precision | 0.6396396396396397
-| recall | 0.24067796610169492
-| f1 | 0.3497536945812808
-| AUC | 0.9033188638123886
+| accuracy | 0.9214
+| precision | 0.39705882352941174
+| recall | 0.6406779661016949
+| f1 | 0.490272373540856
+| AUC | 0.903716565500099
