@@ -103,3 +103,9 @@ Best result got using Grid Search:
 | recall | 0.7864406779661017
 | f1 | 0.3525835866261398
 | AUC | 0.8908107134494497
+
+## 20/11/2018
+
+### Quora Insincere Questions
+
+* **tokens counts - logistic regression** - applying Normalizer and StandardScaler significantly reduced the f1 score.
