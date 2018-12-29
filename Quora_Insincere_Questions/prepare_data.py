@@ -4,17 +4,22 @@ import pandas as pd
 import spacy
 import time
 from tqdm import tqdm
+from gensim.models.phrases import Phrases
+from gensim.models.word2vec import LineSentence
 
 
 def logfunc(func):
+    "Decorator that logs the geven function's runnng time"
+
     def logged(*args):
-        print('running', func.__name__, '...')
+        print('===> running', func.__name__, '...')
         t0 = time.perf_counter()
         result = func(*args)
         elapsed = time.perf_counter() - t0
-        print('finished {} in {:03.2f} s.'.format(func.__name__, elapsed))
+        print('<=== finished {} in {:03.2f} s.'.format(func.__name__, elapsed))
         return result
     return logged
+
 
 class Data:
     def __init__(self, nrows, force):
@@ -38,6 +43,9 @@ class Data:
     def prepare_data(self):
         quora_df = pd.read_csv(self._get_data_path('train.csv'), nrows = self.nrows)
         clean_data_filepath = self._clean(quora_df)
+        bigram_model_filepath, trigram_model_filepath, sentences_filepath = self._build_phrase_models(clean_data_filepath)
+        bigram_model = Phrases.load(bigram_model_filepath)
+        trigram_model = Phrases.load(trigram_model_filepath)
 
 
     @logfunc
@@ -64,6 +72,35 @@ class Data:
 
     def _punct_space(self, token):
         return token.is_punct or token.is_space
+
+
+    @logfunc
+    def _build_phrase_models(self, clean_data_filepath):
+        "Phrase Modeling"
+
+        bigram_sentences_filepath = self._get_output_path('bigram_sentences.txt')
+        trigram_sentences_filepath = self._get_output_path('trigram_sentences.txt')
+        bigram_model_filepath = self._get_output_path('bigram.model')
+        trigram_model_filepath = self._get_output_path('trigram.model')
+
+        unigram_sentences = LineSentence(clean_data_filepath)
+        bigram_model = Phrases(unigram_sentences)
+        bigram_model.save(bigram_model_filepath)
+        self._save_sentences(unigram_sentences, bigram_model, bigram_sentences_filepath)
+        
+        bigram_sentences = LineSentence(bigram_sentences_filepath)
+        trigram_model = Phrases(bigram_sentences)
+        trigram_model.save(trigram_model_filepath)
+        self._save_sentences(bigram_sentences, trigram_model, trigram_sentences_filepath)
+
+        return (bigram_model_filepath, trigram_model_filepath, trigram_sentences_filepath)
+
+
+    def _save_sentences(self, sents, model, filepath):
+        with open(filepath, 'w', encoding='UTF-8') as f:
+            for sent in sents:
+                new_sent = ' '.join(model[sent])
+                f.write(new_sent + '\n')
 
 
     def _get_data_path(self, filename):
