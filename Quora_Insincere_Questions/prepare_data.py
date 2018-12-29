@@ -36,9 +36,11 @@ class Data:
         
         self._load_nlp()
 
+
     @logfunc
     def _load_nlp(self):
         self.nlp = spacy.load('en_core_web_sm')
+
 
     def prepare_data(self):
         quora_df = pd.read_csv(self._get_data_path('train.csv'), nrows = self.nrows)
@@ -54,14 +56,14 @@ class Data:
         if not self.force and os.path.isfile(result_filepath):
             return result_filepath
         
-        cleaned_data = [self._clean_question_text(text) for text in tqdm(quora_df.question_text)]
+        cleaned_data = [self._clean_question_text(text) for text in self.nlp.pipe(tqdm(quora_df.question_text))]
         with open(result_filepath, 'w', encoding='UTF-8') as f:
             f.write('\n'.join(cleaned_data) + '\n')
         
         return result_filepath
 
-    def _clean_question_text(self, text):
-        doc = self.nlp(text)
+
+    def _clean_question_text(self, doc):
         sents = []
         for sent in doc.sents:
             cleaned_sent = ' '.join([token.lemma_ for token in sent if not self._punct_space(token)])
@@ -112,5 +114,5 @@ class Data:
     
 
 if __name__ == '__main__':
-    data = Data(10_000, False)
+    data = Data(10_000, True)
     data.prepare_data()
