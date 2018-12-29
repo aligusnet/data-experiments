@@ -39,7 +39,7 @@ class Data:
 
     @logfunc
     def _load_nlp(self):
-        self.nlp = spacy.load('en_core_web_sm', disable=['tagger', 'ner', 'textcat'])
+        self.nlp = spacy.load('en_core_web_sm', disable=['ner', 'textcat'])
 
 
     def prepare_data(self):
