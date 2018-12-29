@@ -14,6 +14,7 @@ jupyter = "*"
 spacy = "*"
 beautifulsoup4 = "*"
 seaborn = "*"
+gensim = "*"
 
 [requires]
 python_version = "3.7"
