@@ -1,3 +1,4 @@
 .ipynb_checkpoints
 .input
 __pycache__
+.vscode
