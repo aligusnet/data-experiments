@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-
 import spacy
 from spacy.util import minibatch, compounding
+from collections import namedtuple
 
-from prepare_data import logfunc
 
 class Classifier:
     def __init__(self):
@@ -40,7 +39,7 @@ class Classifier:
             optimizer.L2 = 500.0
             self._print_optimizer_params(optimizer)
             print("Training the model...")
-            print('{:^5}\t{:^5}\t{:^5}\t{:^5}\t{}'.format('LOSS', 'P', 'R', 'F1', 'Confusion Matrix'))
+            Stats.print_header()
             batch_size = compounding(400., 1000., 1.001)
             for i in range(n_iter):
                 losses = {}
@@ -52,10 +51,7 @@ class Classifier:
                     with textcat.model.use_params(optimizer.averages):
                         # evaluate on the dev data split off in load_data()
                         scores = Classifier._evaluate(nlp.tokenizer, textcat, test_df)
-                    print('{0:.3f}\t{1:.3f}\t{2:.3f}\t{3:.3f}\t{4}'  # print a simple table
-                        .format(losses['textcat'], scores['textcat_p'],
-                                scores['textcat_r'], scores['textcat_f'],
-                                scores['confusion_matrix']))
+                        Stats.print_scores(losses, scores)
         nlp.to_disk(self.output_dir)
     
 
@@ -71,6 +67,7 @@ class Classifier:
         nrows = df.shape[0]
         row_numbers = np.random.choice(nrows, int(batch_size), replace = False)
         return df.iloc[row_numbers]
+
 
     @staticmethod
     def _evaluate(tokenizer, textcat, df):
@@ -88,7 +85,7 @@ class Classifier:
         tp = 0   # True positives
         fp = 1e-8  # False positives
         fn = 1e-8  # False negatives
-        tn = 1.0   # True negatives
+        tn = 1   # True negatives
         for i in range(len(golds)):
             if preds[i] >= threshold and golds[i] >= threshold:
                 tp += 1
@@ -105,7 +102,7 @@ class Classifier:
             f_score = 2 * (precision * recall) / (precision + recall)
         else:
             f_score = 0
-        return {'textcat_p': precision, 'textcat_r': recall, 'textcat_f': f_score, 'confusion_matrix': [tp, int(fp), tn, int(fn)] }
+        return Scores(precision, recall, f_score, tp, fp, fn, tn)
 
 
 def get_scores(annotations, cat_name):
@@ -122,6 +119,25 @@ def score_to_pred(score, threshold):
     return 0 if score < threshold else 1
 
 v_score_to_pred = np.vectorize(score_to_pred, otypes=[int])
+
+
+Scores = namedtuple('scores', ['precision', 'recall', 'f1', 'tp', 'fp', 'fn', 'tn'])
+
+
+class Stats:
+    @staticmethod
+    def print_header():
+        print('{:^5}\t{:^5}\t{:^5}\t{:^5}\t{}'.format('LOSS', 'P', 'R', 'F1', 'Confusion Matrix'))
+        print('{:^5}\t{:^5}\t{:^5}\t{:^5}\t{}'.format('', '', '', '', '[TP, FP, FN, TN]'))
+
+    @staticmethod
+    def print_scores(losses, scores):
+        print('{0:.3f}\t{1:.3f}\t{2:.3f}\t{3:.3f}\t{4}'  # print a simple table
+                .format(losses['textcat'], scores.precision,
+                        scores.recall, scores.f1,
+                        [int(scores.tp), int(scores.fp), int(scores.fn), int(scores.tn)]))
+
+
 
 if __name__ == '__main__':
     data_path = os.path.join('data', '.input', 'nrows_100000', 'preprocessed.csv')
