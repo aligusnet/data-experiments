@@ -122,7 +122,7 @@ class Data:
             raise Exception('Unexpected number of sentences read')
         
         result_df = pd.DataFrame({'qid': quora_df.qid, 'question_text': sentences, 'target': quora_df.target})
-        result_df.to_csv(result_filepath)
+        result_df.to_csv(result_filepath, index = False)
         return result_filepath
 
 
