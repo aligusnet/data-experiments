@@ -4,7 +4,7 @@ import pandas as pd
 import spacy
 import time
 from tqdm import tqdm
-from gensim.models.phrases import Phrases
+from gensim.models.phrases import Phrases, Phraser
 from gensim.models.word2vec import LineSentence
 
 
@@ -87,17 +87,17 @@ class Data:
         bigram_model_filepath = self._get_output_path('bigram.model')
         trigram_model_filepath = self._get_output_path('trigram.model')
 
-        unigram_sentences = LineSentence(clean_data_filepath)
-        bigram_model = Phrases(unigram_sentences)
-        bigram_model.save(bigram_model_filepath)
-        self._save_sentences(unigram_sentences, bigram_model, bigram_sentences_filepath)
-        
-        bigram_sentences = LineSentence(bigram_sentences_filepath)
-        trigram_model = Phrases(bigram_sentences)
-        trigram_model.save(trigram_model_filepath)
-        self._save_sentences(bigram_sentences, trigram_model, trigram_sentences_filepath)
+        self._train_phrase_detection_model(clean_data_filepath, bigram_sentences_filepath, bigram_model_filepath)
+        self._train_phrase_detection_model(bigram_sentences_filepath, trigram_sentences_filepath, trigram_model_filepath)
 
         return (bigram_model_filepath, trigram_model_filepath, trigram_sentences_filepath)
+
+
+    def _train_phrase_detection_model(self, input_filepath, output_filepath, model_filepath):
+        sentences = LineSentence(input_filepath)
+        model = Phraser(Phrases(sentences))
+        model.save(model_filepath)
+        self._save_sentences(sentences, model, output_filepath)
 
 
     def _save_sentences(self, sents, model, filepath):
@@ -118,7 +118,7 @@ class Data:
         if len(sentences) != nrows:
             print('Expected number of sentences is ', nrows, 
                   ' but read ', len(sentences),
-                  'must rebuild sentences')
+                  ' must rebuild sentences')
             raise Exception('Unexpected number of sentences read')
         
         result_df = pd.DataFrame({'qid': quora_df.qid, 'question_text': sentences, 'target': quora_df.target})
