@@ -8,7 +8,7 @@ from collections import namedtuple
 
 class Classifier:
     def __init__(self):
-        self.nlp = spacy.load('en_core_web_sm')
+        self.nlp = spacy.blank('en')
         self.textcat = Classifier._get_textcat(self.nlp)
         self.output_dir = os.path.join('data', '.input')
 
