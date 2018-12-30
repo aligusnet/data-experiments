@@ -49,6 +49,8 @@ class Data:
         bigram_model = Phrases.load(bigram_model_filepath)
         trigram_model = Phrases.load(trigram_model_filepath)
 
+        return self._save_df(quora_df, sentences_filepath)
+
 
     @logfunc
     def _clean(self, quora_df):
@@ -104,6 +106,31 @@ class Data:
                 new_sent = ' '.join(model[sent])
                 f.write(new_sent + '\n')
 
+    
+    @logfunc
+    def _save_df(self, quora_df, sentences_filepath):
+        result_filepath = self._get_output_path('preprocessed.csv')
+        if not self.force and os.path.isfile(result_filepath):
+            return result_filepath
+        
+        nrows = quora_df.shape[0]
+        sentences = self._read_sentences(sentences_filepath)
+        if len(sentences) != nrows:
+            print('Expected number of sentences is ', nrows, 
+                  ' but read ', len(sentences),
+                  'must rebuild sentences')
+            raise Exception('Unexpected number of sentences read')
+        
+        result_df = pd.DataFrame({'qid': quora_df.qid, 'question_text': sentences, 'target': quora_df.target})
+        result_df.to_csv(result_filepath)
+        return result_filepath
+
+
+    def _read_sentences(self, sentences_filepath):
+        with open(sentences_filepath, 'r', encoding='UTF-8') as f:
+            lines = f.readlines()
+        return list(map(lambda line: line.rstrip(), lines))
+
 
     def _get_data_path(self, filename):
         return os.path.join(self.data_dir, filename)
@@ -114,5 +141,5 @@ class Data:
     
 
 if __name__ == '__main__':
-    data = Data(10_000, True)
+    data = Data(10_000, False)
     data.prepare_data()
