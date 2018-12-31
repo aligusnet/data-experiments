@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-def balance_data(quora_df, random_state = None):
+def balance_data(quora_df, mutiplicator = 1, random_state = None):
     np.random.seed(random_state)
 
     print('before balancing, total cases:', quora_df.shape[0])
@@ -17,7 +17,7 @@ def balance_data(quora_df, random_state = None):
     positive_nrows = positive_df.shape[0]
     negative_nrows = negative_df.shape[0]
 
-    indices = np.random.choice(negative_nrows, positive_nrows, replace = False)
+    indices = np.random.choice(negative_nrows, positive_nrows * mutiplicator, replace = False)
     negative_df = negative_df.values[indices]
     data = np.vstack([positive_df.values, negative_df])
     np.random.shuffle(data)

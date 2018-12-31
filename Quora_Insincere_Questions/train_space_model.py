@@ -43,8 +43,8 @@ class Classifier:
             print("Training the model...")
             Stats.print_header()
             batch_size = compounding(40., 1000., 1.001)
+            losses = {}
             for i in range(n_iter):
-                losses = {}
                 # batch up the examples using spaCy's minibatch
                 batch = Classifier._get_batch(train_df, next(batch_size))
                 nlp.update(batch.texts, batch.annotations, sgd=self.optimizer, drop=0.2, losses=losses)
