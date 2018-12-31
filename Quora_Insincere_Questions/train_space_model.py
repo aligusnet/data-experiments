@@ -7,10 +7,13 @@ from collections import namedtuple
 
 
 class Classifier:
-    def __init__(self):
+    LABEL = 'POSITIVE'
+    def __init__(self, threshold = 0.5):
         self.nlp = spacy.blank('en')
+        self.threshold = threshold
         self.textcat = Classifier._get_textcat(self.nlp)
         self.output_dir = os.path.join('data', '.input')
+        self.optimizer = None
 
     @staticmethod
     def _get_textcat(nlp):
@@ -19,13 +22,13 @@ class Classifier:
             nlp.add_pipe(textcat, last=True)
         else:
             textcat = nlp.get_pipe('textcat')
-        textcat.add_label('POSITIVE')
+        textcat.add_label(Classifier.LABEL)
         return textcat
 
 
     @staticmethod
     def convert_data(quora_df):
-        annotations = quora_df.target.apply(lambda v: {'cats': {'POSITIVE': int(v)}})
+        annotations = quora_df.target.apply(lambda v: {'cats': {Classifier.LABEL: bool(int(v))}})
         df = pd.DataFrame({'texts': quora_df.question_text, 'annotations': annotations})
         return df
 
@@ -35,9 +38,10 @@ class Classifier:
         textcat = self.textcat
         other_pipes = [pipe for pipe in nlp.pipe_names if pipe != 'textcat']
         with nlp.disable_pipes(*other_pipes):
-            optimizer = nlp.begin_training()
-            optimizer.L2 = 500.0
-            self._print_optimizer_params(optimizer)
+            self.optimizer = nlp.begin_training()
+            self.optimizer.L2 = 500.0
+            self.optimizer.max_grad_norm = 200.0
+            self._print_optimizer_params(self.optimizer)
             print("Training the model...")
             Stats.print_header()
             batch_size = compounding(400., 1000., 1.001)
@@ -45,15 +49,19 @@ class Classifier:
                 losses = {}
                 # batch up the examples using spaCy's minibatch
                 batch = Classifier._get_batch(train_df, next(batch_size))
-                nlp.update(batch.texts, batch.annotations, sgd=optimizer, drop=0.2, losses=losses)
+                nlp.update(batch.texts, batch.annotations, sgd=self.optimizer, drop=0.2, losses=losses)
 
                 if i % 10 == 0:
-                    with textcat.model.use_params(optimizer.averages):
-                        # evaluate on the dev data split off in load_data()
-                        scores = Classifier._evaluate(nlp.tokenizer, textcat, test_df)
+                        scores = self._evaluate(test_df)
                         Stats.print_scores(losses, scores)
         nlp.to_disk(self.output_dir)
-    
+
+
+    def predict(self, texts):
+        with self.textcat.model.use_params(self.optimizer.averages):
+            docs = (self.nlp.tokenizer(text) for text in texts)
+            return self.textcat.predict(list(docs))[0]
+
 
     @staticmethod
     def _print_optimizer_params(optimizer):
@@ -69,31 +77,23 @@ class Classifier:
         return df.iloc[row_numbers]
 
 
-    @staticmethod
-    def _evaluate(tokenizer, textcat, df):
-
-        threshold = 0.5
-        golds = get_scores(df.annotations.values, 'POSITIVE')
-        docs = (tokenizer(text) for text in df.texts)
-
-        cat_scores = np.empty(df.shape[0])
-        for i, doc in enumerate(textcat.pipe(docs)):
-            cat_scores[i] = get_score_values({'cats': doc.cats}, 'POSITIVE')
+    def _evaluate(self, df):
+        golds = get_scores(df.annotations.values, Classifier.LABEL)
         
-        preds = v_score_to_pred(cat_scores, threshold)
+        preds = self.predict(df.texts)
 
         tp = 0   # True positives
         fp = 1e-8  # False positives
         fn = 1e-8  # False negatives
         tn = 1   # True negatives
         for i in range(len(golds)):
-            if preds[i] >= threshold and golds[i] >= threshold:
+            if preds[i] >= self.threshold and golds[i] >= self.threshold:
                 tp += 1
-            elif preds[i] >= threshold and golds[i] < threshold:
+            elif preds[i] >= self.threshold and golds[i] < self.threshold:
                 fp += 1
-            elif preds[i] < threshold and golds[i] < threshold:
+            elif preds[i] < self.threshold and golds[i] < self.threshold:
                 tn += 1
-            elif preds[i] < threshold and golds[i] >= threshold:
+            elif preds[i] < self.threshold and golds[i] >= self.threshold:
                 fn += 1
 
         precision = tp / (tp + fp)
