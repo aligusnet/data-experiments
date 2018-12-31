@@ -42,8 +42,8 @@ class Data:
         self.nlp = spacy.load('en_core_web_sm', disable=['ner', 'textcat'])
 
 
-    def prepare_data(self):
-        quora_df = pd.read_csv(self._get_data_path('train.csv'), nrows = self.nrows)
+    def prepare_data(self, filename = 'train.csv'):
+        quora_df = pd.read_csv(self._get_data_path(filename), nrows = self.nrows)
         clean_data_filepath = self._clean(quora_df)
         bigram_model_filepath, trigram_model_filepath, sentences_filepath = self._build_phrase_models(clean_data_filepath)
         bigram_model = Phrases.load(bigram_model_filepath)
@@ -71,7 +71,10 @@ class Data:
             cleaned_sent = ' '.join([token.lemma_ for token in sent if not self._punct_space(token)])
             sents.append(cleaned_sent)
 
-        return '. '.join(sents)
+        cleaned = '. '.join(sents)
+        if len(cleaned) == 0:
+            cleaned = '-EMPTY-'
+        return cleaned
 
 
     def _punct_space(self, token):
@@ -106,7 +109,7 @@ class Data:
                 new_sent = ' '.join(model[sent])
                 f.write(new_sent + '\n')
 
-    
+
     @logfunc
     def _save_df(self, quora_df, sentences_filepath):
         result_filepath = self._get_output_path('preprocessed.csv')
@@ -141,5 +144,5 @@ class Data:
     
 
 if __name__ == '__main__':
-    data = Data(10_000, False)
-    data.prepare_data()
+    data = Data(None, False)
+    data.prepare_data('balanced_train.csv')
