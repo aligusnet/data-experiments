@@ -33,25 +33,23 @@ class Classifier:
         return df
 
 
-    def train(self, train_df, test_df, n_iter=300):
+    def train(self, train_df, test_df, n_iter=1000):
         nlp = self.nlp
         textcat = self.textcat
         other_pipes = [pipe for pipe in nlp.pipe_names if pipe != 'textcat']
         with nlp.disable_pipes(*other_pipes):
             self.optimizer = nlp.begin_training()
-            self.optimizer.L2 = 500.0
-            self.optimizer.max_grad_norm = 200.0
             self._print_optimizer_params(self.optimizer)
             print("Training the model...")
             Stats.print_header()
-            batch_size = compounding(400., 1000., 1.001)
+            batch_size = compounding(40., 1000., 1.001)
             for i in range(n_iter):
                 losses = {}
                 # batch up the examples using spaCy's minibatch
                 batch = Classifier._get_batch(train_df, next(batch_size))
                 nlp.update(batch.texts, batch.annotations, sgd=self.optimizer, drop=0.2, losses=losses)
 
-                if i % 10 == 0:
+                if i % 50 == 0:
                         scores = self._evaluate(test_df)
                         Stats.print_scores(losses, scores)
         nlp.to_disk(self.output_dir)
@@ -140,7 +138,7 @@ class Stats:
 
 
 if __name__ == '__main__':
-    data_path = os.path.join('data', '.input', 'nrows_100000', 'preprocessed.csv')
+    data_path = os.path.join('data', '.input', 'full', 'preprocessed.csv')
     quora_df = Classifier.convert_data(pd.read_csv(data_path))
     nrows = quora_df.shape[0]
     train_nrows = nrows - nrows // 50
