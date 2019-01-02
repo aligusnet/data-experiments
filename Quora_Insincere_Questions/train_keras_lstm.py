@@ -32,7 +32,7 @@ class LstmClassifier:
 
 
     @logfunc
-    def train(self, train_df, val_df, batch_size=100, nb_epoch=5):
+    def fit(self, train_df, val_df, nb_epoch=5, batch_size=128):
         train_X = self._get_features(train_df.question_text)
         val_X = self._get_features(val_df.question_text)
 
@@ -42,23 +42,28 @@ class LstmClassifier:
         self.model = model
 
 
+    def predict(self, df):
+        X = self._get_features(df.question_text, False)
+        return self.model.predict(X)
+
+
     def _get_embedings(self):
         return self.nlp.vocab.vectors.data
 
 
     @logfunc
-    def _get_features(self, docs):
+    def _get_features(self, docs, add_new = True):
         Xs = np.zeros((len(docs), self.shape.max_length), dtype='int32')
         docs = self.nlp.pipe(docs)
         for i, doc in enumerate(tqdm(docs)):
             for j, token in enumerate(doc[:self.shape.max_length]):
-                Xs[i, j] = self._get_vector(token)
+                Xs[i, j] = self._get_vector(token, add_new)
         return Xs
 
 
-    def _get_vector(self, token):
+    def _get_vector(self, token, add_new):
         vector_id = token.vocab.vectors.find(key=token.orth)
-        if vector_id < 0 and '_' in token.orth_:
+        if add_new and vector_id < 0 and '_' in token.orth_:
             doc = self.nlp(token.orth_.replace('_', ' '))
             if doc.vector_norm > 0:
                 self.nlp.vocab.set_vector(token.orth, doc.vector)
@@ -95,15 +100,19 @@ class LstmClassifier:
 
 
 if __name__ == '__main__':
+    data_path = os.path.join('data', '.input', 'full', 'preprocessed.csv')
+    nrows = 50_000
+
     shape = LstmShape(64, 100, 1)
     settings = LstmSettings(0.5, 0.001)
 
-    data_path = os.path.join('data', '.input', 'full', 'preprocessed.csv')
-    quora_df = pd.read_csv(data_path, nrows=50_000)
+    
+    quora_df = pd.read_csv(data_path, nrows = nrows)
     nrows = quora_df.shape[0]
     train_nrows = nrows - 500
     train_df = quora_df.iloc[:train_nrows]
     val_df = quora_df.iloc[train_nrows:]
 
     lstm = LstmClassifier(shape, settings)
-    lstm.train(train_df, val_df)
+    lstm.fit(train_df, val_df, 5, 128)
+    print(lstm.predict(val_df[:10]))
