@@ -33,9 +33,10 @@ class LstmClassifier:
 
     @logfunc
     def train(self, train_df, val_df, batch_size=100, nb_epoch=5):
-        model = self._compile_model(self._get_embedings(), self.shape, self.settings)
         train_X = self._get_features(train_df.question_text)
         val_X = self._get_features(val_df.question_text)
+
+        model = self._compile_model(self._get_embedings(), self.shape, self.settings)
         model.fit(train_X, train_df.target, validation_data=(val_X, val_df.target),
             epochs=nb_epoch, batch_size=batch_size)
         self.model = model
@@ -44,19 +45,27 @@ class LstmClassifier:
     def _get_embedings(self):
         return self.nlp.vocab.vectors.data
 
+
     @logfunc
     def _get_features(self, docs):
         Xs = np.zeros((len(docs), self.shape.max_length), dtype='int32')
         docs = self.nlp.pipe(docs)
         for i, doc in enumerate(tqdm(docs)):
             for j, token in enumerate(doc[:self.shape.max_length]):
-                vector_id = token.vocab.vectors.find(key=token.orth)
-                if vector_id >= 0:
-                    Xs[i, j] = vector_id
-                else:
-                    Xs[i, j] = 0
-                j += 1
+                Xs[i, j] = self._get_vector(token)
         return Xs
+
+
+    def _get_vector(self, token):
+        vector_id = token.vocab.vectors.find(key=token.orth)
+        if vector_id < 0 and '_' in token.orth_:
+            doc = self.nlp(token.orth_.replace('_', ' '))
+            if doc.vector_norm > 0:
+                self.nlp.vocab.set_vector(token.orth, doc.vector)
+                vector_id = token.vocab.vectors.find(key=token.orth)
+            else:
+                print('no vector for', token.orth_)
+        return vector_id if vector_id > 0 else 0
 
 
     @staticmethod
