@@ -9,7 +9,9 @@ from collections import namedtuple
 import os
 from tqdm import tqdm
 
+from keras_metrics import Metrics
 from prepare_data import logfunc
+
 
 
 LstmShape = namedtuple('LstmShape', 'num_hidden max_length num_class'.split())
@@ -38,7 +40,7 @@ class LstmClassifier:
 
         model = self._compile_model(self._get_embedings(), self.shape, self.settings)
         model.fit(train_X, train_df.target, validation_data=(val_X, val_df.target),
-            epochs=nb_epoch, batch_size=batch_size)
+            epochs=nb_epoch, batch_size=batch_size, callbacks=[Metrics((val_X, val_df.target))])
         self.model = model
 
 
