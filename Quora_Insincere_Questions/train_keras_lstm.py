@@ -9,9 +9,11 @@ from collections import namedtuple
 import os
 from tqdm import tqdm
 
-from keras_metrics import Metrics
-from prepare_data import logfunc
+if not 'Metrics' in globals():
+    from keras_metrics import Metrics
 
+if not 'logfunc' in globals():
+    from logfunc import logfunc
 
 
 LstmShape = namedtuple('LstmShape', 'num_hidden max_length num_class'.split())

@@ -2,23 +2,13 @@ import os
 import numpy as np
 import pandas as pd
 import spacy
-import time
 from tqdm import tqdm
 from gensim.models.phrases import Phrases, Phraser
 from gensim.models.word2vec import LineSentence
 
 
-def logfunc(func):
-    "Decorator that logs the geven function's runnng time"
-
-    def logged(*args, **kwargs):
-        print('===> running', func.__name__, '...')
-        t0 = time.perf_counter()
-        result = func(*args, **kwargs)
-        elapsed = time.perf_counter() - t0
-        print('<=== finished {} in {:03.2f} s.'.format(func.__name__, elapsed))
-        return result
-    return logged
+if not 'logfunc' in globals():
+    from logfunc import logfunc
 
 
 class Data:
