@@ -23,6 +23,12 @@ def _get_vector(index, word):
     if vector is None:
         vector = index.get(word.lower())
 
+    if vector is None and word.startswith("'") and len(word) > 1:
+        return get_vector(index, word[1:])
+    
+    if vector is None and word.startswith(".") and len(word) > 1:
+        return get_vector(index, word[1:])
+
     return vector
     
 
@@ -30,7 +36,7 @@ def _get_vector(index, word):
 def build_embeddings_matrix(embeddings_index, word_index, max_features):
     embed_mean, embed_std = -0.005838499,0.48782197
     embed_size = 300
-    num_words = min(max_features, len(word_index))
+    num_words = min(max_features, len(word_index) + 1)
     embeddings = np.random.normal(embed_mean, embed_std, (num_words, embed_size))
 
     for word, index in word_index.items():
