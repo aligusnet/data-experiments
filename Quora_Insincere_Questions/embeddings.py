@@ -24,10 +24,10 @@ def _get_vector(index, word):
         vector = index.get(word.lower())
 
     if vector is None and word.startswith("'") and len(word) > 1:
-        return get_vector(index, word[1:])
+        return _get_vector(index, word[1:])
     
     if vector is None and word.startswith(".") and len(word) > 1:
-        return get_vector(index, word[1:])
+        return _get_vector(index, word[1:])
 
     return vector
     
