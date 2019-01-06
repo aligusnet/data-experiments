@@ -17,6 +17,7 @@ seaborn = "*"
 gensim = "*"
 tensorflow = "*"
 keras = "*"
+nltk = "*"
 
 [requires]
 python_version = "3.6"
