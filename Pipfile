@@ -18,6 +18,7 @@ gensim = "*"
 tensorflow = "*"
 keras = "*"
 nltk = "*"
+cython = "*"
 
 [requires]
 python_version = "3.6"
