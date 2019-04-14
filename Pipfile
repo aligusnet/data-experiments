@@ -6,23 +6,22 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-pandas = "*"
+cython = "*"
 scipy = "*"
 matplotlib = "*"
+pandas = "*"
 scikit-learn = "*"
 jupyter = "*"
-spacy = "*"
 beautifulsoup4 = "*"
+spacy = "*"
 seaborn = "*"
 gensim = "*"
 tensorflow = "*"
 keras = "*"
 nltk = "*"
-cython = "*"
-pyyaml = ">=4.2b1"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
 
 [pipenv]
 allow_prereleases = true
