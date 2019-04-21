@@ -70,21 +70,19 @@ def main():
 
     for build_model in (h.build_lstm_model, h.build_gru_model):
         model = build_model(embedding_matrix, y_aux_train.shape[-1])
-        for global_epoch in range(EPOCHS):
-            model.fit(
-                x_train,
-                [y_train, y_aux_train],
-                batch_size=BATCH_SIZE,
-                epochs=1,
-                verbose=2,
-                callbacks=[
-                    LearningRateScheduler(lambda epoch: 1e-3 * (0.6 ** global_epoch))
-                ]
-            )
-            checkpoint_predictions.append(model.predict(x_test, batch_size=2048)[0].flatten())
-            weights.append(2 ** global_epoch)
+        model.fit(
+            x_train,
+            [y_train, y_aux_train],
+            batch_size=BATCH_SIZE,
+            epochs=EPOCHS,
+            verbose=2,
+            callbacks=[
+                LearningRateScheduler(lambda epoch: 1e-3 * (0.6 ** epoch))
+            ]
+        )
+        checkpoint_predictions.append(model.predict(x_test, batch_size=2048)[0].flatten())
 
-    predictions = np.average(checkpoint_predictions, weights=weights, axis=0)
+    predictions = np.average(checkpoint_predictions, axis=0)
 
     submission = pd.DataFrame.from_dict({
         'id': test_df['id'],
